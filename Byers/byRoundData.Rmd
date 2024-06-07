@@ -1,0 +1,70 @@
+---
+title: "EDA mini project - Byers"
+output: html_document
+date: "2024-06-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+library(tidyverse)
+wta <- read_csv("https://raw.githubusercontent.com/36-SURE/36-SURE.github.io/main/data/wta_grand_slam_matches.csv")
+```
+
+```{r}
+head(wta)
+
+dim(wta)
+
+#idea 1: if the match goes to a third set, who is more likely to win, the person who won the first set or the second set?
+
+#idea 2: are you more likely to come back from losing the first set if you lose by 2-3 or 4-6
+
+#idea 3: do lefties have more aces or righties (against percentage of lefties v righties)
+
+#idea 4: do games furhter in the tournament have higher set totals
+
+
+
+wta2<- wta |> separate(score, sep=" ", c("match_1", "match_2", "match_3"))
+
+head(wta2)
+wta2<- wta |> 
+  mutate(avg_age = (loser_age+winner_age)/2) |> 
+  mutate(total_aces = l_ace+w_ace)
+
+time_table <- wta2 |> 
+  group_by(round) |> 
+  select(round, minutes, avg_age, total_aces) |> 
+  filter(minutes != '0') |> 
+  summarize(min_time = min(minutes, na.rm =TRUE),
+            max_time = max(minutes, na.rm =TRUE),
+            mean_time = mean(minutes, na.rm =TRUE),
+            avg_age = mean(avg_age),
+            avg_aces = mean(total_aces)
+            ) 
+
+  
+#view(time_table)
+time_table|> 
+  ggplot(aes(x = reorder(round, mean_time), y=mean_time, color = avg_age, size=avg_aces)) +
+  geom_point() +
+  scale_color_viridis_c() +
+  labs(
+    title = "Average Time per Match by Round",
+    subtitle = "With Comparisons of Average Age and Average Number of Aces (per match)",
+    x = "Round",
+    y = "Average Time",
+    caption = "Excluding withdrawn games"
+  )+
+  theme_minimal()
+```
+

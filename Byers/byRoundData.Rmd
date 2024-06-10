@@ -26,17 +26,45 @@ dim(wta)
 
 #idea 1: if the match goes to a third set, who is more likely to win, the person who won the first set or the second set?
 
-#idea 2: are you more likely to come back from losing the first set if you lose by 2-3 or 4-6
-
 #idea 3: do lefties have more aces or righties (against percentage of lefties v righties)
 
-#idea 4: do games furhter in the tournament have higher set totals
+#idea 4: do games further in the tournament have higher set totals
 
 
 
-wta2<- wta |> separate(score, sep=" ", c("match_1", "match_2", "match_3"))
+wta3 <- wta |> separate(score, sep=" ", c("match_1", "match_2", "match_3"))
+wta3 <- wta3 |>  separate(match_1, sep="-", c("w_set1_score", 'l_set1_score'))
+wta3 <- wta3 |>  separate(match_2, sep="-", c("w_set2_score", 'l_set2_score'))
+wta3 <- wta3 |>  separate(match_3, sep="-", c("w_set3_score", 'l_set3_score'))
+#view(wta3)
 
-head(wta2)
+# wta3 <-wta3 |> 
+#   mutate(games_in_set1 = w_set1_score+l_set1_score, 
+#          games_in_set2 = w_set2_score+l_set2_score, 
+#          games_in_set3 = w_set3_score+l_set3_score)
+
+head(wta3)
+
+extra.games <- function (x) {
+
+  
+  if( x[1]==7) { wta3 <- wta3 |>  mutate(games_in_set1 = 13)  }
+  
+  if( x[2]==7) { wta3 <- wta3 |>  mutate(games_in_set1 = 13)  }
+  
+ else {
+   x = as.double(x)
+  wta3 <- wta3 |> mutate(games_in_set1 = sum(x[1],x[2]))
+}}
+
+wta3 <- lapply(X=wta3[,16:17], FUN = extra.games)
+
+
+view(wta3)
+```
+
+```{r}
+
 wta2<- wta |> 
   mutate(avg_age = (loser_age+winner_age)/2) |> 
   mutate(total_aces = l_ace+w_ace)
@@ -67,4 +95,145 @@ time_table|>
   )+
   theme_minimal()
 ```
+```{r}
+# wta <- wta |> 
+#   select(winner_ioc) |> 
+#   group_by(winner_ioc) |> 
+#   tally() 
 
+
+wta$winner_ioc[wta$winner_ioc == "ARG"] <- "Argentina"
+wta$winner_ioc[wta$winner_ioc == "AUS"] <- "Australia"
+wta$winner_ioc[wta$winner_ioc == "AUT"] <- "Austria"
+wta$winner_ioc[wta$winner_ioc == "BEL"] <- "Belgium"
+wta$winner_ioc[wta$winner_ioc == "BLR"] <- "Belarus"
+wta$winner_ioc[wta$winner_ioc == "BRA"] <- "Brazil"
+wta$winner_ioc[wta$winner_ioc == "BUL"] <- "Bulgaria"
+wta$winner_ioc[wta$winner_ioc == "CAN"] <- "Canada"
+wta$winner_ioc[wta$winner_ioc == "CHN"] <- "China"
+wta$winner_ioc[wta$winner_ioc == "COL"] <- "Columbia"
+wta$winner_ioc[wta$winner_ioc == "CRO"] <- "Croatia"
+wta$winner_ioc[wta$winner_ioc == "CZE"] <- "Czechia"
+wta$winner_ioc[wta$winner_ioc == "DEN"] <- "Denmark"
+wta$winner_ioc[wta$winner_ioc == "EGY"] <- "Egypt"
+wta$winner_ioc[wta$winner_ioc == "ESP"] <- "Spain"
+wta$winner_ioc[wta$winner_ioc == "EST"] <- "Estonia"
+wta$winner_ioc[wta$winner_ioc == "FRA"] <- "France"
+wta$winner_ioc[wta$winner_ioc == "GBR"] <- "UK"
+wta$winner_ioc[wta$winner_ioc == "GEO"] <- "Georgia"
+wta$winner_ioc[wta$winner_ioc == "GER"] <- "Germany"
+wta$winner_ioc[wta$winner_ioc == "GRE"] <- "Greece"
+wta$winner_ioc[wta$winner_ioc == "GEO"] <- "Georgia"
+wta$winner_ioc[wta$winner_ioc == "HUN"] <- "Hungary"
+wta$winner_ioc[wta$winner_ioc == "ISR"] <- "Israel"
+wta$winner_ioc[wta$winner_ioc == "ITA"] <- "Italy"
+wta$winner_ioc[wta$winner_ioc == "JPN"] <- "Japan"
+wta$winner_ioc[wta$winner_ioc == "KAZ"] <- "Kazakhstan"
+wta$winner_ioc[wta$winner_ioc == "LAT"] <- "Latvia"
+wta$winner_ioc[wta$winner_ioc == "LUX"] <- "Luxembourg"
+wta$winner_ioc[wta$winner_ioc == "MDA"] <- "Moldova"
+wta$winner_ioc[wta$winner_ioc == "MEX"] <- "Mexico"
+wta$winner_ioc[wta$winner_ioc == "MNE"] <- "Montenegro"
+wta$winner_ioc[wta$winner_ioc == "NED"] <- "Netherlands"
+wta$winner_ioc[wta$winner_ioc == "POL"] <- "Poland"
+wta$winner_ioc[wta$winner_ioc == "PUR"] <- "Puerto Rico"
+wta$winner_ioc[wta$winner_ioc == "ROU"] <- "Romania"
+wta$winner_ioc[wta$winner_ioc == "RUS"] <- "Russia"
+wta$winner_ioc[wta$winner_ioc == "SLO"] <- "Slovenia"
+wta$winner_ioc[wta$winner_ioc == "SRB"] <- "Serbia"
+wta$winner_ioc[wta$winner_ioc == "SUI"] <- "Switzerland"
+wta$winner_ioc[wta$winner_ioc == "SVK"] <- "Slovakia"
+wta$winner_ioc[wta$winner_ioc == "SWE"] <- "Sweden"
+wta$winner_ioc[wta$winner_ioc == "TPE"] <- "Taiwan"
+wta$winner_ioc[wta$winner_ioc == "THA"] <- "Thailand"
+wta$winner_ioc[wta$winner_ioc == "TUN"] <- "Tunisia"
+wta$winner_ioc[wta$winner_ioc == "UKR"] <- "Ukraine"
+
+```
+
+```{r}
+
+
+# create world map using ggplot() function 
+world_map <- map_data("world")
+world_map <- subset(world_map, region != "Antarctica")
+
+ggplot(wta) +
+  geom_map(
+    data =  world_map, map = world_map, aes(map_id = region),
+    fill = "white", color = "#7f7f7f", size = 0.25
+  ) +
+  geom_map(map = world_map, aes(map_id = winner_ioc, fill = n), size = 0.25) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Tournament Wins") +
+  expand_limits(x = world_map$long, y = world_map$lat)
+
+
+
+```
+```{r}
+wta4 <- wta2 |>
+  select(loser_ioc) |>
+  group_by(loser_ioc) |>
+  tally()
+
+wta4$loser_ioc[wta4$loser_ioc == "ARG"] <- "Argentina"
+wta4$loser_ioc[wta4$loser_ioc == "AUS"] <- "Australia"
+wta4$loser_ioc[wta4$loser_ioc == "AUT"] <- "Austria"
+wta4$loser_ioc[wta4$loser_ioc == "BEL"] <- "Belgium"
+wta4$loser_ioc[wta4$loser_ioc == "BLR"] <- "Belarus"
+wta4$loser_ioc[wta4$loser_ioc == "BRA"] <- "Brazil"
+wta4$loser_ioc[wta4$loser_ioc == "BUL"] <- "Bulgaria"
+wta4$loser_ioc[wta4$loser_ioc == "CAN"] <- "Canada"
+wta4$loser_ioc[wta4$loser_ioc == "CHN"] <- "China"
+wta4$loser_ioc[wta4$loser_ioc == "COL"] <- "Columbia"
+wta4$loser_ioc[wta4$loser_ioc == "CRO"] <- "Croatia"
+wta4$loser_ioc[wta4$loser_ioc == "CZE"] <- "Czechia"
+wta4$loser_ioc[wta4$loser_ioc == "DEN"] <- "Denmark"
+wta4$loser_ioc[wta4$loser_ioc == "EGY"] <- "Egypt"
+wta4$loser_ioc[wta4$loser_ioc == "ESP"] <- "Spain"
+wta4$loser_ioc[wta4$loser_ioc == "EST"] <- "Estonia"
+wta4$loser_ioc[wta4$loser_ioc == "FRA"] <- "France"
+wta4$loser_ioc[wta4$loser_ioc == "GBR"] <- "UK"
+wta4$loser_ioc[wta4$loser_ioc == "GEO"] <- "Georgia"
+wta4$loser_ioc[wta4$loser_ioc == "GER"] <- "Germany"
+wta4$loser_ioc[wta4$loser_ioc == "GRE"] <- "Greece"
+wta4$loser_ioc[wta4$loser_ioc == "GEO"] <- "Georgia"
+wta4$loser_ioc[wta4$loser_ioc == "HUN"] <- "Hungary"
+wta4$loser_ioc[wta4$loser_ioc == "ISR"] <- "Israel"
+wta4$loser_ioc[wta4$loser_ioc == "ITA"] <- "Italy"
+wta4$loser_ioc[wta4$loser_ioc == "JPN"] <- "Japan"
+wta4$loser_ioc[wta4$loser_ioc == "KAZ"] <- "Kazakhstan"
+wta4$loser_ioc[wta4$loser_ioc == "LAT"] <- "Latvia"
+wta4$loser_ioc[wta4$loser_ioc == "LUX"] <- "Luxembourg"
+wta4$loser_ioc[wta4$loser_ioc == "MDA"] <- "Moldova"
+wta4$loser_ioc[wta4$loser_ioc == "MEX"] <- "Mexico"
+wta4$loser_ioc[wta4$loser_ioc == "MNE"] <- "Montenegro"
+wta4$loser_ioc[wta4$loser_ioc == "NED"] <- "Netherlands"
+wta4$loser_ioc[wta4$loser_ioc == "POL"] <- "Poland"
+wta4$loser_ioc[wta4$loser_ioc == "PUR"] <- "Puerto Rico"
+wta4$loser_ioc[wta4$loser_ioc == "ROU"] <- "Romania"
+wta4$loser_ioc[wta4$loser_ioc == "RUS"] <- "Russia"
+wta4$loser_ioc[wta4$loser_ioc == "SLO"] <- "Slovenia"
+wta4$loser_ioc[wta4$loser_ioc == "SRB"] <- "Serbia"
+wta4$loser_ioc[wta4$loser_ioc == "SUI"] <- "Switzerland"
+wta4$loser_ioc[wta4$loser_ioc == "SVK"] <- "Slovakia"
+wta4$loser_ioc[wta4$loser_ioc == "SWE"] <- "Sweden"
+wta4$loser_ioc[wta4$loser_ioc == "TPE"] <- "Taiwan"
+wta4$loser_ioc[wta4$loser_ioc == "THA"] <- "Thailand"
+wta4$loser_ioc[wta4$loser_ioc == "TUN"] <- "Tunisia"
+wta4$loser_ioc[wta4$loser_ioc == "UKR"] <- "Ukraine"
+
+world_map <- map_data("world")
+world_map <- subset(world_map, region != "Antarctica")
+
+ggplot(wta4) +
+  geom_map(
+    data =  world_map, map = world_map, aes(map_id = region),
+    fill = "white", color = "#7f7f7f", size = 0.25
+  ) +
+  geom_map(map = world_map, aes(map_id = loser_ioc, fill = n), size = 0.25) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Tournament Losses") +
+  expand_limits(x = world_map$long, y = world_map$lat)
+
+
+```

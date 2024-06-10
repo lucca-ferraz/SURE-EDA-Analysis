@@ -49,10 +49,9 @@ wta_grand_slam_matches %>%
 # But as the match gets longer, the older players may have felt tired already,
 # while the younger players have more endurance so the winner age is smaller.
 
+average_duration <- wta_grand_slam_matches %>%
+  summarise(average_duration = mean(minutes, na.rm = TRUE))
 
-
-
-
-
-
-
+# ave
+print(average_duration)
+# 97.3

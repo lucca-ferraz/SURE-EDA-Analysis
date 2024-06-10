@@ -216,3 +216,4 @@ wta_grand_slam_matches |>
   filter(rank_diff >=10) |> 
   ggplot(aes(x = df_diff)) +
   geom_histogram()
+

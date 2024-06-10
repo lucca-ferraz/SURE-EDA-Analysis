@@ -5,82 +5,6 @@ wta_grand_slam_matches <- read_csv("https://raw.githubusercontent.com/36-SURE/36
 colnames(wta_grand_slam_matches)
 unique(wta_grand_slam_matches$tourney_name)
 
-#plot: minutes per game sorted by tournament
-wta_grand_slam_matches |> 
-  group_by(tourney_name) |> 
-  ggplot(aes(x = minutes, color = tourney_name)) +
-  geom_bar() + 
-  facet_wrap(vars(tourney_name))
-
-#plot: minutes per game sorted by surface
-wta_grand_slam_matches |> 
-  group_by(surface) |> 
-  ggplot(aes(x = minutes, color = surface)) +
-  geom_bar() + 
-  facet_wrap(vars(surface))
-
-#plot: comparing winners and losers 1st serves won
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_1stWon, y = l_1stWon)) +
-  geom_point() + 
-  geom_smooth()
-  
-#plot: comparing winners and losers 2nd serves won
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_2ndWon, y = l_2ndWon)) +
-  geom_point() + 
-  geom_smooth()
-
-#plot: comparing winners and losers serve points won
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_svpt, y = l_svpt)) +
-  geom_point() + 
-  geom_smooth()
-
-#plot: comparing winners break points faced and saved
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_bpFaced, y = w_bpSaved)) + 
-  geom_point() +
-  geom_smooth()
-
-#plot: comparing losers break points faced and saved
-wta_grand_slam_matches |> 
-  ggplot(aes(x = l_bpFaced, y = l_bpSaved)) + 
-  geom_point() +
-  geom_smooth()
-
-#plot: comparing winners and losers break points faced
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_bpFaced, y = l_bpFaced)) + 
-  geom_point() +
-  geom_smooth()
-
-#plot: comparing winners and losers break points saved
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_bpSaved, y = l_bpSaved)) + 
-  geom_point() +
-  geom_smooth()
-
-#plot: distribution of winner's countries
-wta_grand_slam_matches |> 
-  count(winner_ioc, name = "count") |> 
-  filter(count >= 50) |> 
-  ggplot(aes(x = winner_ioc, y = count)) +
-  geom_col()
-
-#plot: distribution of loser's countries
-wta_grand_slam_matches |> 
-  count(loser_ioc, name = "count") |> 
-  filter(count >= 50) |> 
-  ggplot(aes(x = loser_ioc, y = count)) +
-  geom_col()
-
-#plot: comparing winners and losers aces
-wta_grand_slam_matches |> 
-  ggplot(aes(x = w_ace, y = l_ace)) + 
-  geom_point() +
-  geom_smooth()
-
 #plot: typical ace differential in a match
 wta_grand_slam_matches |> 
   mutate(ace_diff = w_ace - l_ace) |> 
@@ -99,12 +23,6 @@ wta_grand_slam_matches |>
   ggplot(aes(x = secondsrv_diff)) +
   geom_bar()
 
-#box plot: distribution of match length
-wta_grand_slam_matches |> 
-  ggplot(aes(x = minutes)) +
-  geom_boxplot() +
-  theme(axis.text.y = element_blank())
-
 #histogram: distribution of match length
 wta_grand_slam_matches |> 
   ggplot(aes(x = minutes)) + 
@@ -115,12 +33,6 @@ library(ggbeeswarm)
 wta_grand_slam_matches |> 
   ggplot(aes(x = minutes, y = "")) +
   geom_beeswarm(cex = 2)
-
-#violin plot + boxplot: distribution of match length
-wta_grand_slam_matches |> 
-  ggplot(aes(x = minutes, y = "")) +
-  geom_violin() + 
-  geom_boxplot(width = 0.4)
 
 #ECDF plot: match length
 wta_grand_slam_matches |> 
@@ -216,4 +128,72 @@ wta_grand_slam_matches |>
   filter(rank_diff >=10) |> 
   ggplot(aes(x = df_diff)) +
   geom_histogram()
+
+# Create a dataframe for winners
+winners <- wta_grand_slam_matches |> 
+  select(tourney_name, surface, tourney_date, 
+         seed = winner_seed, name = winner_name, hand = winner_hand, 
+         height = winner_ht, ioc = winner_ioc, age = winner_age, 
+         ace = w_ace, df = w_df, svpt = w_svpt, 
+         firstIn = w_1stIn, firstWon = w_1stWon, 
+         secondWon = w_2ndWon, svGms = w_SvGms, bpSaved = w_bpSaved, 
+         bpFaced = w_bpFaced, rank = winner_rank, opponent_rank = loser_rank,
+         opponent_seed = loser_seed, opponent_name = loser_name, opponent_hand = loser_hand, 
+         opponent_height = loser_ht, opponent_ioc = loser_ioc, opponent_age = loser_age, 
+         opponent_ace = l_ace, opponent_df = l_df, opponent_svpt = l_svpt, 
+         opponent_firstIn = l_1stIn, opponent_firstWon = l_1stWon, 
+         opponent_secondWon = l_2ndWon, opponent_svGms = l_SvGms, opponent_bpSaved = l_bpSaved, 
+         opponent_bpFaced = l_bpFaced,
+         minutes, score, round) |> 
+  mutate(result = "Win",
+         rank_diff = opponent_rank - rank)
+
+# Create a dataframe for losers
+losers <- wta_grand_slam_matches |> 
+  select(tourney_name, surface, tourney_date, 
+         seed = loser_seed, name = loser_name, hand = loser_hand, 
+         height = loser_ht, ioc = loser_ioc, age = loser_age, 
+         ace = l_ace, df = l_df, svpt = l_svpt, 
+         firstIn = l_1stIn, firstWon = l_1stWon, 
+         secondWon = l_2ndWon, svGms = l_SvGms, bpSaved = l_bpSaved, 
+         bpFaced = l_bpFaced, rank = loser_rank, opponent_rank = winner_rank,
+         opponent_seed = winner_seed, opponent_name = winner_name, opponent_hand = winner_hand, 
+         opponent_height = winner_ht, opponent_ioc = winner_ioc, opponent_age = winner_age, 
+         opponent_ace = w_ace, opponent_df = w_df, opponent_svpt = w_svpt, 
+         opponent_firstIn = w_1stIn, opponent_firstWon = w_1stWon, 
+         opponent_secondWon = w_2ndWon, opponent_svGms = w_SvGms, opponent_bpSaved = w_bpSaved, 
+         opponent_bpFaced = w_bpFaced,
+         minutes, score, round) |> 
+  mutate(result = "Loss",
+         rank_diff = opponent_rank - rank)
+
+# Create a combined dataframe 
+wta_grand_slam_players <- winners |> 
+  mutate(row_num = row_number()) |> 
+  bind_rows(losers |>  mutate(row_num = row_number())) |> 
+  arrange(row_num, result)  |> 
+  select(-row_num)
+
+# plot: serves won vs opponent serves won in upsets
+wta_grand_slam_players |> 
+  filter(rank_diff < -50) |> 
+  ggplot(aes(x = firstWon, y = opponent_firstWon, color = result, alpha = 0.5)) +
+  geom_point() +
+  ggthemes::theme_clean() +
+  facet_wrap(~ result) +
+  ggtitle("How Do First Serves Won Impact Upsets in Tennis?",
+          subtitle = "Among matches with a rank differential above 50") +
+  xlab("First Serves Won") + 
+  ylab("Opponent First Serves Won") +
+  guides(alpha = "none") + 
+  labs(caption = "Data from WTA matches 2018-2023")
+
+# plot: top 3 countries wins and losses
+wta_grand_slam_players |> 
+  count(ioc, name = "count", result) |> 
+  filter(count >= 190) |> 
+  ggplot(aes(x = ioc, y = count, fill = result)) +
+  geom_col() +
+  ggthemes::theme_clean() +
+  facet_wrap(~ result)
 

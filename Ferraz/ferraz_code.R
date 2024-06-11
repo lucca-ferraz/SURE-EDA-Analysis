@@ -197,3 +197,76 @@ wta_grand_slam_players |>
   ggthemes::theme_clean() +
   facet_wrap(~ result)
 
+colSums(is.na(wta_grand_slam_players))
+
+player_stats <- wta_grand_slam_players |> 
+  filter(score != "W/O") |> 
+  group_by(name) |> 
+  summarise(height = mean(height, na.rm = TRUE), first_serve_pct = sum(firstIn) / sum(svpt),
+            first_serve_win_pct = sum(firstWon) / sum(firstIn),
+            second_serve_win_pct = sum(secondWon) / (sum(svpt) - sum(firstIn)),
+            ace_pct = sum(ace) / sum(svpt), bp_save_pct = sum(bpSaved) / sum(bpFaced),
+            df_pct = sum(df, na.rm = TRUE) / sum(svpt), avg_match_length = mean(minutes, na.rm = TRUE), 
+            games = n(), win_pct = sum(result == "Win") / n(),
+            opponent_first_serve_win_pct = sum(opponent_firstWon) / sum(opponent_firstIn),
+            opponent_second_serve_win_pct = sum(opponent_secondWon) / (sum(opponent_svpt) - sum(opponent_firstIn)),
+            opponent_ace_pct = sum(opponent_ace) / sum(opponent_svpt),
+            opponent_bp_break_pct = 1 - sum(opponent_bpSaved)/sum(opponent_bpFaced)
+            )
+
+# plot: first serve percent vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = first_serve_pct, y = win_pct)) +
+  geom_point()
+
+# plot: first serve win pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = first_serve_win_pct, y = win_pct)) +
+  geom_point()
+
+# plot: second serve win pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = second_serve_win_pct, y = win_pct)) +
+  geom_point()
+
+# plot: ace pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = ace_pct, y = win_pct)) +
+  geom_point()
+
+# plot: double fault pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = df_pct, y = win_pct)) +
+  geom_point()
+
+# plot: break point save pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = bp_save_pct, y = win_pct)) +
+  geom_point()
+
+# plot: opponent first serve win pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = opponent_first_serve_win_pct, y = win_pct)) +
+  geom_point()
+
+# plot: breaking opponents serve pct vs win pct
+player_stats |> 
+  filter(games > 10) |> 
+  ggplot(aes(x = opponent_bp_break_pct, y = win_pct)) +
+  geom_point()
+
+clean_cluster_stats <- player_stats |> 
+  filter(games > 10) |> 
+  mutate(std_bp_save_pct = as.numeric(scale(bp_save_pct)),
+         std_opponent_bp_break_pct = as.numeric(scale(opponent_bp_break_pct)))
+
+kmeans <- clean_cluster_stats |> 
+  select(std_bp_save_pct, std_opponent_bp_break_pct) |> 
+  kmeans()

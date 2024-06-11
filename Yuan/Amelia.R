@@ -72,10 +72,10 @@ ggplot(wta_grand_slam_matches, aes(x = winner_rank, y = loser_rank)) +
     caption = "The orange line means that Winner Rank and the Loser Rank are the same."
   ) +
   theme_minimal() +
-  coord_fixed(ratio = 1) +  # 保持x和y轴的比例
+  coord_fixed(ratio = 1) +  
   theme(
-    plot.title = element_text(hjust = 0.5),  # 标题居中
-    legend.position = "none"  # 不显示图例
+    plot.title = element_text(hjust = 0.5),  
+    legend.position = "none"  
   )
 
 # Expanation:
@@ -104,6 +104,31 @@ winner_rank_higher_ratio <- winner_rank_higher_count / total_matches
 # Print the results
 cat("The ratio of the winner ranks higher:", winner_rank_higher_ratio * 100, "%\n")
 # The ratio of the winner ranks higher: 67.33995 %
+
+library(dplyr)
+library(ggplot2)
+library(cluster)
+
+
+wta_prepared <- wta_grand_slam_matches |>
+  select(winner_age) |>
+  na.omit() |> 
+  scale()  
+
+
+hc <- hclust(dist(wta_prepared), method = "ward.D2")
+
+
+plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches")
+
+
+clusters <- cutree(hc, k = 4)
+wta_grand_slam_matches$cluster <- as.factor(clusters)
+
+
+ggplot(wta_grand_slam_matches, aes(x = winner_age, y = w_1stWon, color = cluster)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Cluster Analysis of WTA Grand Slam Matches by Age")
 
 
 

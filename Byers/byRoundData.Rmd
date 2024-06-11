@@ -165,7 +165,11 @@ ggplot(wta) +
   ) +
   geom_map(map = world_map, aes(map_id = winner_ioc, fill = n), size = 0.25) +
   scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Tournament Wins") +
-  expand_limits(x = world_map$long, y = world_map$lat)
+  expand_limits(x = world_map$long, y = world_map$lat)+
+  labs(
+        caption = "White = no tournament data"
+
+  )
 
 
 
@@ -222,7 +226,10 @@ wta4$loser_ioc[wta4$loser_ioc == "TPE"] <- "Taiwan"
 wta4$loser_ioc[wta4$loser_ioc == "THA"] <- "Thailand"
 wta4$loser_ioc[wta4$loser_ioc == "TUN"] <- "Tunisia"
 wta4$loser_ioc[wta4$loser_ioc == "UKR"] <- "Ukraine"
+```
 
+
+```{r}
 world_map <- map_data("world")
 world_map <- subset(world_map, region != "Antarctica")
 
@@ -233,7 +240,268 @@ ggplot(wta4) +
   ) +
   geom_map(map = world_map, aes(map_id = loser_ioc, fill = n), size = 0.25) +
   scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Tournament Losses") +
-  expand_limits(x = world_map$long, y = world_map$lat)
+  expand_limits(x = world_map$long, y = world_map$lat) +
+  labs(
+        caption = "White = no tournament data"
+
+  )
 
 
 ```
+
+
+```{r}
+#world maop by number of players per country? (not done yet)
+world_map <- map_data("world")
+world_map <- subset(world_map, region != "Antarctica")
+
+ggplot(wta4) +
+  geom_map(
+    data =  world_map, map = world_map, aes(map_id = region),
+    fill = "white", color = "#7f7f7f", size = 0.25
+  ) +
+  geom_map(map = world_map, aes(map_id = loser_ioc, fill = n), size = 0.25) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Tournament Losses") +
+  expand_limits(x = world_map$long, y = world_map$lat) +
+  labs(
+        caption = "White = no tournament data"
+
+  )
+
+```
+
+
+```{r}
+#clustering
+#
+library(dslabs)
+
+wta2 <- wta2 |> 
+  mutate(rank_dif = abs(loser_rank-winner_rank))
+
+head(wta2)
+
+cluster_rank_time <- wta2 |> select(minutes, rank_dif)
+cluster_rank_time <- cluster_rank_time[which(!is.na(cluster_rank_time$rank_dif)),]
+cluster_rank_time <- cluster_rank_time[which(!is.na(cluster_rank_time$minutes)),]
+cluster <- kmeans(cluster_rank_time ,algorithm = "Lloyd", centers = 3, nstart=1)
+
+cluster_rank_time$rank_clusters <- as.factor(cluster$cluster)
+
+  ggplot(aes(x = rank_dif, y = minutes,
+             color = rank_clusters),data= cluster_rank_time) +
+  geom_point(size = 4) + 
+  ggthemes::scale_color_colorblind() +
+  theme(legend.position = "bottom") +
+  coord_fixed()
+
+#scale
+cluster_rank_time <- cluster_rank_time |>
+  mutate(
+    std_rank_dif = as.numeric(scale(rank_dif, center = TRUE, scale = TRUE)),
+    std_minutes = as.numeric(scale(minutes, center = TRUE, scale = TRUE))
+  )
+#dif every time
+std_kmeans <- cluster_rank_time |>
+  select(std_rank_dif, std_minutes) |>
+  kmeans(algorithm = "Lloyd", centers = 4, nstart = 1)
+
+#same every time
+nstart_kmeans <- cluster_rank_time |>
+  select(std_rank_dif, std_minutes) |>
+  kmeans(algorithm = "Lloyd", centers = 3, nstart = 30)
+
+
+cluster_rank_time |>
+  mutate(
+    rank_clusters = as.factor(nstart_kmeans$cluster)
+  ) |>
+  ggplot(aes(x = rank_dif, y = minutes,
+             color = rank_clusters)) +
+  geom_point(size = 4) +
+  ggthemes::scale_color_colorblind() +
+  theme(legend.position = "bottom") +
+  coord_fixed()
+```
+
+```{r}
+#elbow plots
+
+gapminder_kmeans <- function(k) {
+  
+  kmeans_results <- cluster_rank_time |>
+    select(std_rank_dif, std_minutes) |>
+    kmeans(centers = k, nstart = 30)
+  
+  kmeans_out <- tibble(
+    clusters = k,
+    total_wss = kmeans_results$tot.withinss
+  )
+  return(kmeans_out)
+}
+
+n_clusters_search <- 2:12
+
+kmeans_search <- n_clusters_search |> 
+  map(gapminder_kmeans) |> 
+  bind_rows()
+
+kmeans_search |> 
+  ggplot(aes(x = clusters, y = total_wss)) +
+  geom_line() + 
+  geom_point(size = 4) +
+  scale_x_continuous(breaks = n_clusters_search)
+```
+```{r}
+#break point
+#does someone who wins more break points lose to less aces
+#cluster breakpoint average against aces lost to
+wta2 <- wta2 |> 
+  mutate("w_bp_percent" = w_bpSaved/w_bpFaced) |> 
+  mutate("l_bp_percent" = l_bpSaved/l_bpFaced)
+
+head(wta2)
+
+bp_winners <- wta2 |> 
+  select(winner_name, w_bp_percent, l_ace) |> 
+  group_by(winner_name) |> 
+  summarize(
+    avg_ace_lost = mean(l_ace),
+    w_bp_percent_avg = mean(w_bp_percent)
+  ) |> 
+  filter(w_bp_percent_avg>= 0)
+  
+head(bp_winners)
+
+bp_losers <- wta2 |> 
+  select(loser_name, l_bp_percent, w_ace) |> 
+  group_by(loser_name) |> 
+  summarize(
+    avg_ace_lost = mean(w_ace),
+    l_bp_percent_avg = mean(l_bp_percent)
+  ) |> 
+  filter(l_bp_percent_avg>= 0)
+
+head(bp_losers)
+
+```
+
+
+```{r}
+
+#alter below
+#winner clustering
+#scale
+bp_winners_cluster <- bp_winners |>
+  mutate(
+    std_avgAceLost = as.numeric(scale(avg_ace_lost, center = TRUE, scale = TRUE)),
+    std_breakLossPerc = as.numeric(scale(w_bp_percent_avg, center = TRUE, scale = TRUE))
+  )
+#create clusters
+nstart_kmeans <- bp_winners_cluster |>
+  select(std_avgAceLost, std_breakLossPerc) |>
+  kmeans(algorithm = "Lloyd", centers = 3, nstart = 30)
+
+#plot
+bp_winners_cluster |>
+  mutate(
+    receive_clusters = as.factor(nstart_kmeans$cluster)
+  ) |>
+  ggplot(aes(x = avg_ace_lost, y = w_bp_percent_avg,
+             color = receive_clusters)) +
+  geom_point(size = 4) +
+  ggthemes::scale_color_colorblind() +
+  theme(legend.position = "bottom") +
+  coord_fixed() +
+  labs(
+      title="Clustering of Winning Players using Aces Lost to and Break Points Saved",
+      y= "Average Break Point Save Percentage per Game",
+      x= "Average Aces lost to per Game"
+  )
+#(width = 20, height = 20)
+
+#elbow plots
+gapminder_kmeans <- function(k) {
+  
+  kmeans_results <- bp_winners_cluster |>
+    select(std_avgAceLost, std_breakLossPerc) |>
+    kmeans(centers = k, nstart = 30)
+  
+  kmeans_out <- tibble(
+    clusters = k,
+    total_wss = kmeans_results$tot.withinss
+  )
+  return(kmeans_out)
+}
+
+n_clusters_search <- 2:12
+
+kmeans_search <- n_clusters_search |> 
+  map(gapminder_kmeans) |> 
+  bind_rows()
+
+kmeans_search |> 
+  ggplot(aes(x = clusters, y = total_wss)) +
+  geom_line() + 
+  geom_point(size = 4) +
+  scale_x_continuous(breaks = n_clusters_search)
+```
+
+```{r}
+
+#lsoer clustering
+bp_losers_cluster <- bp_losers |>
+  mutate(
+    std_avgAceLost = as.numeric(scale(avg_ace_lost, center = TRUE, scale = TRUE)),
+    std_breakLossPerc = as.numeric(scale(l_bp_percent_avg, center = TRUE, scale = TRUE))
+  )
+#create clusters
+nstart_kmeans <- bp_losers_cluster |>
+  select(std_avgAceLost, std_breakLossPerc) |>
+  kmeans(algorithm = "Lloyd", centers = 3, nstart = 30)
+
+#plot
+bp_losers_cluster |>
+  mutate(
+    receive_clusters = as.factor(nstart_kmeans$cluster)
+  ) |>
+  ggplot(aes(x = avg_ace_lost, y = l_bp_percent_avg,
+             color = receive_clusters)) +
+  geom_point(size = 4) +
+  ggthemes::scale_color_colorblind() +
+  theme(legend.position = "bottom") +
+  coord_fixed()+
+  labs(
+    title="Clustering of Losing Players using Aces Lost to and Break Points Saved",
+    y= "Average Break Point Save Percentage per Game",
+    x= "Average Aces lost to per Game"
+  )
+#x11(width = 20, height = 20)
+
+#elbow plots
+gapminder_kmeans <- function(k) {
+  
+  kmeans_results <- bp_losers_cluster |>
+    select(std_avgAceLost, std_breakLossPerc) |>
+    kmeans(centers = k, nstart = 30)
+  
+  kmeans_out <- tibble(
+    clusters = k,
+    total_wss = kmeans_results$tot.withinss
+  )
+  return(kmeans_out)
+}
+
+n_clusters_search <- 2:12
+
+kmeans_search <- n_clusters_search |> 
+  map(gapminder_kmeans) |> 
+  bind_rows()
+
+kmeans_search |> 
+  ggplot(aes(x = clusters, y = total_wss)) +
+  geom_line() + 
+  geom_point(size = 4) +
+  scale_x_continuous(breaks = n_clusters_search)
+```
+

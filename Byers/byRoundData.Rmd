@@ -80,74 +80,76 @@ time_table <- wta2 |>
             avg_aces = mean(total_aces)
             ) 
 
-  
+f <- factor(c("R128", "R64", "R32", "R16", "QF", "SF", "F"), levels = c("R128", "R64", "R32", "R16", "QF", "SF", "F"))
+
+
 #view(time_table)
 time_table|> 
-  ggplot(aes(x = reorder(round, mean_time), y=mean_time, color = avg_age, size=avg_aces)) +
+  ggplot(aes(x = reorder(round, f), y=mean_time, color = avg_age, size=avg_aces)) +
   geom_point() +
   scale_color_viridis_c() +
   labs(
     title = "Average Time per Match by Round",
     subtitle = "With Comparisons of Average Age and Average Number of Aces (per match)",
-    x = "Round",
-    y = "Average Time",
+    x = "Round of Tournament",
+    y = "Average Time (minutes)",
     caption = "Excluding withdrawn games"
   )+
   theme_minimal()
 ```
 ```{r}
-# wta <- wta |> 
-#   select(winner_ioc) |> 
-#   group_by(winner_ioc) |> 
-#   tally() 
+wta5 <- wta |>
+  select(winner_ioc) |>
+  group_by(winner_ioc) |>
+  tally()
 
 
-wta$winner_ioc[wta$winner_ioc == "ARG"] <- "Argentina"
-wta$winner_ioc[wta$winner_ioc == "AUS"] <- "Australia"
-wta$winner_ioc[wta$winner_ioc == "AUT"] <- "Austria"
-wta$winner_ioc[wta$winner_ioc == "BEL"] <- "Belgium"
-wta$winner_ioc[wta$winner_ioc == "BLR"] <- "Belarus"
-wta$winner_ioc[wta$winner_ioc == "BRA"] <- "Brazil"
-wta$winner_ioc[wta$winner_ioc == "BUL"] <- "Bulgaria"
-wta$winner_ioc[wta$winner_ioc == "CAN"] <- "Canada"
-wta$winner_ioc[wta$winner_ioc == "CHN"] <- "China"
-wta$winner_ioc[wta$winner_ioc == "COL"] <- "Columbia"
-wta$winner_ioc[wta$winner_ioc == "CRO"] <- "Croatia"
-wta$winner_ioc[wta$winner_ioc == "CZE"] <- "Czechia"
-wta$winner_ioc[wta$winner_ioc == "DEN"] <- "Denmark"
-wta$winner_ioc[wta$winner_ioc == "EGY"] <- "Egypt"
-wta$winner_ioc[wta$winner_ioc == "ESP"] <- "Spain"
-wta$winner_ioc[wta$winner_ioc == "EST"] <- "Estonia"
-wta$winner_ioc[wta$winner_ioc == "FRA"] <- "France"
-wta$winner_ioc[wta$winner_ioc == "GBR"] <- "UK"
-wta$winner_ioc[wta$winner_ioc == "GEO"] <- "Georgia"
-wta$winner_ioc[wta$winner_ioc == "GER"] <- "Germany"
-wta$winner_ioc[wta$winner_ioc == "GRE"] <- "Greece"
-wta$winner_ioc[wta$winner_ioc == "GEO"] <- "Georgia"
-wta$winner_ioc[wta$winner_ioc == "HUN"] <- "Hungary"
-wta$winner_ioc[wta$winner_ioc == "ISR"] <- "Israel"
-wta$winner_ioc[wta$winner_ioc == "ITA"] <- "Italy"
-wta$winner_ioc[wta$winner_ioc == "JPN"] <- "Japan"
-wta$winner_ioc[wta$winner_ioc == "KAZ"] <- "Kazakhstan"
-wta$winner_ioc[wta$winner_ioc == "LAT"] <- "Latvia"
-wta$winner_ioc[wta$winner_ioc == "LUX"] <- "Luxembourg"
-wta$winner_ioc[wta$winner_ioc == "MDA"] <- "Moldova"
-wta$winner_ioc[wta$winner_ioc == "MEX"] <- "Mexico"
-wta$winner_ioc[wta$winner_ioc == "MNE"] <- "Montenegro"
-wta$winner_ioc[wta$winner_ioc == "NED"] <- "Netherlands"
-wta$winner_ioc[wta$winner_ioc == "POL"] <- "Poland"
-wta$winner_ioc[wta$winner_ioc == "PUR"] <- "Puerto Rico"
-wta$winner_ioc[wta$winner_ioc == "ROU"] <- "Romania"
-wta$winner_ioc[wta$winner_ioc == "RUS"] <- "Russia"
-wta$winner_ioc[wta$winner_ioc == "SLO"] <- "Slovenia"
-wta$winner_ioc[wta$winner_ioc == "SRB"] <- "Serbia"
-wta$winner_ioc[wta$winner_ioc == "SUI"] <- "Switzerland"
-wta$winner_ioc[wta$winner_ioc == "SVK"] <- "Slovakia"
-wta$winner_ioc[wta$winner_ioc == "SWE"] <- "Sweden"
-wta$winner_ioc[wta$winner_ioc == "TPE"] <- "Taiwan"
-wta$winner_ioc[wta$winner_ioc == "THA"] <- "Thailand"
-wta$winner_ioc[wta$winner_ioc == "TUN"] <- "Tunisia"
-wta$winner_ioc[wta$winner_ioc == "UKR"] <- "Ukraine"
+wta5$winner_ioc[wta5$winner_ioc == "ARG"] <- "Argentina"
+wta5$winner_ioc[wta5$winner_ioc == "AUS"] <- "Australia"
+wta5$winner_ioc[wta5$winner_ioc == "AUT"] <- "Austria"
+wta5$winner_ioc[wta5$winner_ioc == "BEL"] <- "Belgium"
+wta5$winner_ioc[wta5$winner_ioc == "BLR"] <- "Belarus"
+wta5$winner_ioc[wta5$winner_ioc == "BRA"] <- "Brazil"
+wta5$winner_ioc[wta5$winner_ioc == "BUL"] <- "Bulgaria"
+wta5$winner_ioc[wta5$winner_ioc == "CAN"] <- "Canada"
+wta5$winner_ioc[wta5$winner_ioc == "CHN"] <- "China"
+wta5$winner_ioc[wta5$winner_ioc == "COL"] <- "Columbia"
+wta5$winner_ioc[wta5$winner_ioc == "CRO"] <- "Croatia"
+wta5$winner_ioc[wta5$winner_ioc == "CZE"] <- "Czechia"
+wta5$winner_ioc[wta5$winner_ioc == "DEN"] <- "Denmark"
+wta5$winner_ioc[wta5$winner_ioc == "EGY"] <- "Egypt"
+wta5$winner_ioc[wta5$winner_ioc == "ESP"] <- "Spain"
+wta5$winner_ioc[wta5$winner_ioc == "EST"] <- "Estonia"
+wta5$winner_ioc[wta5$winner_ioc == "FRA"] <- "France"
+wta5$winner_ioc[wta5$winner_ioc == "GBR"] <- "UK"
+wta5$winner_ioc[wta5$winner_ioc == "GEO"] <- "Georgia"
+wta5$winner_ioc[wta5$winner_ioc == "GER"] <- "Germany"
+wta5$winner_ioc[wta5$winner_ioc == "GRE"] <- "Greece"
+wta5$winner_ioc[wta5$winner_ioc == "GEO"] <- "Georgia"
+wta5$winner_ioc[wta5$winner_ioc == "HUN"] <- "Hungary"
+wta5$winner_ioc[wta5$winner_ioc == "ISR"] <- "Israel"
+wta5$winner_ioc[wta5$winner_ioc == "ITA"] <- "Italy"
+wta5$winner_ioc[wta5$winner_ioc == "JPN"] <- "Japan"
+wta5$winner_ioc[wta5$winner_ioc == "KAZ"] <- "Kazakhstan"
+wta5$winner_ioc[wta5$winner_ioc == "LAT"] <- "Latvia"
+wta5$winner_ioc[wta5$winner_ioc == "LUX"] <- "Luxembourg"
+wta5$winner_ioc[wta5$winner_ioc == "MDA"] <- "Moldova"
+wta5$winner_ioc[wta5$winner_ioc == "MEX"] <- "Mexico"
+wta5$winner_ioc[wta5$winner_ioc == "MNE"] <- "Montenegro"
+wta5$winner_ioc[wta5$winner_ioc == "NED"] <- "Netherlands"
+wta5$winner_ioc[wta5$winner_ioc == "POL"] <- "Poland"
+wta5$winner_ioc[wta5$winner_ioc == "PUR"] <- "Puerto Rico"
+wta5$winner_ioc[wta5$winner_ioc == "ROU"] <- "Romania"
+wta5$winner_ioc[wta5$winner_ioc == "RUS"] <- "Russia"
+wta5$winner_ioc[wta5$winner_ioc == "SLO"] <- "Slovenia"
+wta5$winner_ioc[wta5$winner_ioc == "SRB"] <- "Serbia"
+wta5$winner_ioc[wta5$winner_ioc == "SUI"] <- "Switzerland"
+wta5$winner_ioc[wta5$winner_ioc == "SVK"] <- "Slovakia"
+wta5$winner_ioc[wta5$winner_ioc == "SWE"] <- "Sweden"
+wta5$winner_ioc[wta5$winner_ioc == "TPE"] <- "Taiwan"
+wta5$winner_ioc[wta5$winner_ioc == "THA"] <- "Thailand"
+wta5$winner_ioc[wta5$winner_ioc == "TUN"] <- "Tunisia"
+wta5$winner_ioc[wta5$winner_ioc == "UKR"] <- "Ukraine"
 
 ```
 
@@ -158,7 +160,7 @@ wta$winner_ioc[wta$winner_ioc == "UKR"] <- "Ukraine"
 world_map <- map_data("world")
 world_map <- subset(world_map, region != "Antarctica")
 
-ggplot(wta) +
+ggplot(wta5) +
   geom_map(
     data =  world_map, map = world_map, aes(map_id = region),
     fill = "white", color = "#7f7f7f", size = 0.25
@@ -251,7 +253,7 @@ ggplot(wta4) +
 
 
 ```{r}
-#world maop by number of players per country? (not done yet)
+#world maop by number of players per country? (not done yet, barely touched)
 world_map <- map_data("world")
 world_map <- subset(world_map, region != "Antarctica")
 
@@ -403,22 +405,23 @@ nstart_kmeans <- bp_winners_cluster |>
   kmeans(algorithm = "Lloyd", centers = 3, nstart = 30)
 
 #plot
-bp_winners_cluster |>
+graph1 <- bp_winners_cluster |>
   mutate(
-    receive_clusters = as.factor(nstart_kmeans$cluster)
+    clusters = as.factor(nstart_kmeans$cluster)
   ) |>
   ggplot(aes(x = avg_ace_lost, y = w_bp_percent_avg,
-             color = receive_clusters)) +
-  geom_point(size = 4) +
-  ggthemes::scale_color_colorblind() +
+             color = clusters)) +
+  geom_point(size = 2) +
+  scale_fill_viridis_c() +
   theme(legend.position = "bottom") +
   coord_fixed() +
   labs(
-      title="Clustering of Winning Players using Aces Lost to and Break Points Saved",
-      y= "Average Break Point Save Percentage per Game",
+      title="Winning Players Clustered by Break Points and Aces",
+      y= "Avg Break Point Save 
+      Percentage per Game",
       x= "Average Aces lost to per Game"
-  )
-#(width = 20, height = 20)
+  ) +
+  coord_fixed(ratio=2)
 
 #elbow plots
 gapminder_kmeans <- function(k) {
@@ -443,7 +446,7 @@ kmeans_search <- n_clusters_search |>
 kmeans_search |> 
   ggplot(aes(x = clusters, y = total_wss)) +
   geom_line() + 
-  geom_point(size = 4) +
+  geom_point(size = 2) +
   scale_x_continuous(breaks = n_clusters_search)
 ```
 
@@ -461,25 +464,28 @@ nstart_kmeans <- bp_losers_cluster |>
   kmeans(algorithm = "Lloyd", centers = 3, nstart = 30)
 
 #plot
-bp_losers_cluster |>
+graph2 <-bp_losers_cluster |>
   mutate(
-    receive_clusters = as.factor(nstart_kmeans$cluster)
+    clusters = as.factor(nstart_kmeans$cluster)
   ) |>
   ggplot(aes(x = avg_ace_lost, y = l_bp_percent_avg,
-             color = receive_clusters)) +
-  geom_point(size = 4) +
-  ggthemes::scale_color_colorblind() +
+             color = clusters)) +
+  geom_point(size = 2) +
+  scale_fill_viridis_b() +
   theme(legend.position = "bottom") +
   coord_fixed()+
   labs(
-    title="Clustering of Losing Players using Aces Lost to and Break Points Saved",
-    y= "Average Break Point Save Percentage per Game",
+    title="Losing Players Clustered by Break Points and Aces",
+    y= "Avg Break Points Save 
+    Percentage per game",
     x= "Average Aces lost to per Game"
-  )
-#x11(width = 20, height = 20)
+  )+
+  coord_fixed(ratio=4) +
+  scale_y_continuous(limits =(0:1))
+
 
 #elbow plots
-gapminder_kmeans <- function(k) {
+wta_kmeans <- function(k) {
   
   kmeans_results <- bp_losers_cluster |>
     select(std_avgAceLost, std_breakLossPerc) |>
@@ -495,13 +501,22 @@ gapminder_kmeans <- function(k) {
 n_clusters_search <- 2:12
 
 kmeans_search <- n_clusters_search |> 
-  map(gapminder_kmeans) |> 
+  map(wta_kmeans) |> 
   bind_rows()
 
 kmeans_search |> 
   ggplot(aes(x = clusters, y = total_wss)) +
   geom_line() + 
-  geom_point(size = 4) +
-  scale_x_continuous(breaks = n_clusters_search)
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = n_clusters_search) 
+  
 ```
+```{r}
+# plot winner and loser clusters together
+plot_grid(graph1, graph2, nrow=2, align='h')
+
+
+```
+
+
 

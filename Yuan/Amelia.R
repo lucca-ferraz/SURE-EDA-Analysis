@@ -110,25 +110,35 @@ library(ggplot2)
 library(cluster)
 
 
-wta_prepared <- wta_grand_slam_matches |>
-  select(winner_age) |>
-  na.omit() |> 
-  scale()  
+wta_prepared <- wta_grand_slam_matches %>%
+  select(winner_age, w_ace) %>%
+  na.omit()
 
+# caculate
+distance_matrix <- dist(wta_prepared, method = "euclidean")
 
-hc <- hclust(dist(wta_prepared), method = "ward.D2")
+# clu
+hc <- hclust(distance_matrix, method = "complete")
 
+# den
+plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches by Age and Aces")
 
-plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches")
+# hight
+clusters <- cutree(hc, k = 4) # 或者选择一个高度，例如：cutree(hc, h = 5)
 
+# add to original dataset
+wta_prepared$cluster <- as.factor(clusters)
 
-clusters <- cutree(hc, k = 4)
-wta_grand_slam_matches$cluster <- as.factor(clusters)
-
-
-ggplot(wta_grand_slam_matches, aes(x = winner_age, y = w_1stWon, color = cluster)) +
+# point plot
+ggplot(wta_prepared, aes(x = winner_age, y = w_ace, color = cluster)) +
   geom_point(alpha = 0.6) +
-  labs(title = "Cluster Analysis of WTA Grand Slam Matches by Age")
+  labs(title = "Cluster Analysis of Winner's Age vs. Number of Aces",
+       x = "Winner's Age",
+       y = "Number of Aces",
+       color = "Cluster") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
 
 
 

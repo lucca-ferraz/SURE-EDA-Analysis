@@ -262,11 +262,53 @@ player_stats |>
   ggplot(aes(x = opponent_bp_break_pct, y = win_pct)) +
   geom_point()
 
+
+#clustering players based on bp save pct and opponent bp break pct (how well they perform on break points)
 clean_cluster_stats <- player_stats |> 
   filter(games > 10) |> 
   mutate(std_bp_save_pct = as.numeric(scale(bp_save_pct)),
          std_opponent_bp_break_pct = as.numeric(scale(opponent_bp_break_pct)))
 
+# install.packages("NbClust")
+library(NbClust)
+clean_cluster_stats |> 
+  select(std_bp_save_pct, std_opponent_bp_break_pct) |>
+  NbClust(method = "complete", index = "all")
+
 kmeans <- clean_cluster_stats |> 
   select(std_bp_save_pct, std_opponent_bp_break_pct) |> 
-  kmeans()
+  kmeans(centers = 4, nstart = 30, algorithm = "Lloyd")
+
+# Visualizing k-means clusters
+clean_cluster_stats |> 
+  mutate(player_cluster = factor(kmeans$cluster)) |> 
+  ggplot(aes(x = std_bp_save_pct, y = std_opponent_bp_break_pct,
+             color = player_cluster)) +
+  geom_point() +
+  ggthemes::scale_color_colorblind() +
+  coord_fixed() +
+  xlab("Standardized Break Point Saved %") +
+  ylab("Standardized Opponent Break Points Broken %") +
+  labs(title = "K-Means Clustering - Break Point Performance")
+
+# density plot comparing win percentages for each cluster
+clean_cluster_stats |> 
+  mutate(player_cluster = factor(kmeans$cluster)) |> 
+  group_by(player_cluster) |> 
+  ggplot(aes(x = win_pct, fill = player_cluster)) +
+  geom_density() +
+  facet_wrap(~ player_cluster, labeller = labeller(player_cluster = c(
+    "1" = "Good Saving BP, Avg Converting BP",
+    "2" = "Avg Converting BP, Bad Saving BP",
+    "3" = "Good Converting BP, Avg Saving BP",
+    "4" = "Avg Saving BP, Bad Converting BP"
+  ))) +
+  labs(title = "Win Percentages Based on Cluster", 
+       subtitle = "Clusters 1 and 3 tend to dominate",
+       caption = "Data from WTA Matches 2018 - 2023") +
+  ggthemes::theme_clean() + 
+  scale_fill_discrete(name = "Player Cluster")
+
+clean_cluster_stats |> 
+  ggplot(aes(x = height, y = ace_pct)) +
+  geom_point()

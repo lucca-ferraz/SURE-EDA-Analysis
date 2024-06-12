@@ -124,7 +124,7 @@ hc <- hclust(distance_matrix, method = "complete")
 plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches by Age and Aces")
 
 # hight
-clusters <- cutree(hc, k = 4) # 或者选择一个高度，例如：cutree(hc, h = 5)
+clusters <- cutree(hc, k = 4) 
 
 # add to original dataset
 wta_prepared$cluster <- as.factor(clusters)

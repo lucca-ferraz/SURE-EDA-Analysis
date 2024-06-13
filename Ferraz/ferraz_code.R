@@ -283,9 +283,10 @@ kmeans <- clean_cluster_stats |>
 clean_cluster_stats |> 
   mutate(player_cluster = factor(kmeans$cluster)) |> 
   ggplot(aes(x = std_bp_save_pct, y = std_opponent_bp_break_pct,
-             color = player_cluster)) +
+             color = player_cluster, shape = player_cluster)) +
   geom_point() +
   ggthemes::scale_color_colorblind() +
+  ggthemes::theme_clean() +
   coord_fixed() +
   xlab("Standardized Break Point Saved %") +
   ylab("Standardized Opponent Break Points Broken %") +
@@ -309,6 +310,4 @@ clean_cluster_stats |>
   ggthemes::theme_clean() + 
   scale_fill_discrete(name = "Player Cluster")
 
-clean_cluster_stats |> 
-  ggplot(aes(x = height, y = ace_pct)) +
-  geom_point()
+

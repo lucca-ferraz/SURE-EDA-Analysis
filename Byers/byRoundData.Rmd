@@ -17,6 +17,7 @@ When you click the **Knit** button a document will be generated that includes bo
 ```{r}
 library(tidyverse)
 wta <- read_csv("https://raw.githubusercontent.com/36-SURE/36-SURE.github.io/main/data/wta_grand_slam_matches.csv")
+spec(wta)
 ```
 
 ```{r}
@@ -24,46 +25,91 @@ head(wta)
 
 dim(wta)
 
-#idea 1: if the match goes to a third set, who is more likely to win, the person who won the first set or the second set?
-
-#idea 3: do lefties have more aces or righties (against percentage of lefties v righties)
-
-#idea 4: do games further in the tournament have higher set totals
-
-
 
 wta3 <- wta |> separate(score, sep=" ", c("match_1", "match_2", "match_3"))
 wta3 <- wta3 |>  separate(match_1, sep="-", c("w_set1_score", 'l_set1_score'))
 wta3 <- wta3 |>  separate(match_2, sep="-", c("w_set2_score", 'l_set2_score'))
 wta3 <- wta3 |>  separate(match_3, sep="-", c("w_set3_score", 'l_set3_score'))
+
+
+install.packages('stringr')
+library(stringr)
+# wta3 <- wta3 |>  separate(l_set1_score, sep="(", c("l_games_set1", "extra"))
 #view(wta3)
 
-# wta3 <-wta3 |> 
-#   mutate(games_in_set1 = w_set1_score+l_set1_score, 
-#          games_in_set2 = w_set2_score+l_set2_score, 
+# wta3 <-wta3 |>
+#   mutate(games_in_set1 = w_set1_score+l_set1_score,
+#          games_in_set2 = w_set2_score+l_set2_score,
 #          games_in_set3 = w_set3_score+l_set3_score)
-
-head(wta3)
-
-extra.games <- function (x) {
-
-  
-  if( x[1]==7) { wta3 <- wta3 |>  mutate(games_in_set1 = 13)  }
-  
-  if( x[2]==7) { wta3 <- wta3 |>  mutate(games_in_set1 = 13)  }
-  
- else {
-   x = as.double(x)
-  wta3 <- wta3 |> mutate(games_in_set1 = sum(x[1],x[2]))
-}}
-
-wta3 <- lapply(X=wta3[,16:17], FUN = extra.games)
-
-
-view(wta3)
 ```
 
 ```{r}
+#SPLITTING FAILURES
+
+# #set 1
+# wta3$w_set1_games <- c()
+# wta3$l_set1_games <- c()
+# wta3$w_set1_games <- rep(NA, length(wta3$w_set1_score))
+# wta3$l_set1_games <- rep(NA, length(wta3$l_set1_score))
+# 
+# for(i in 1:length(wta3$w_set1_score)) {
+# wta3$w_set1_games[i] <- ifelse( "6(" %in% wta3$w_set1_score[i],6, wta3$w_set1_score[i])
+# }
+# 
+# for(i in 1:length(wta3$l_set1_score)) {
+# wta3$l_set1_games[i] <- ifelse( "6(" %in% wta3$l_set1_score[i],6, wta3$l_set1_score[i])
+# }
+# 
+# #set 2
+# wta3$w_set2_games <- c()
+# wta3$l_set2_games <- c()
+# wta3$w_set2_games <- rep(NA, length(wta3$w_set2_score))
+# wta3$l_set2_games <- rep(NA, length(wta3$l_set2_score))
+# 
+# for(i in 1:length(wta3$w_set2_score)) {
+# wta3$w_set2_games[i] <- ifelse( "(" %in% wta3$w_set2_score[i],6, wta3$w_set2_score[i])
+# }
+# 
+# for(i in 1:length(wta3$l_set1_score)) {
+# wta3$l_set2_games[i] <- ifelse( "(" %in% wta3$l_set2_score[i],6, wta3$l_set2_score[i])
+# }
+# 
+# 
+# #set 3
+# wta3$w_set3_games <- c()
+# wta3$l_set3_games <- c()
+# wta3$w_set3_games <- rep(NA, length(wta3$w_set3_score))
+# wta3$l_set3_games <- rep(NA, length(wta3$l_set3_score))
+# 
+# for(i in 1:length(wta3$w_set3_score)) {
+# wta3$w_set3_games[i] <- ifelse( "(" %in% wta3$w_set3_score[i],6, wta3$w_set3_score[i])
+# }
+# 
+# for(i in 1:length(wta3$l_set1_score)) {
+# wta3$l_set3_games[i] <- ifelse( "(" %in% wta3$l_set3_score[i],6, wta3$l_set3_score[i])
+# }
+# 
+# wta3 <- wta3 |>
+#   mutate(games_in_set1 = l_set1_games+w_set1_games,
+#          games_in_set2 = w_set2_games+l_set2_games)
+#          #games_in_set3 = w_set3_games+l_set3_games)
+
+
+```
+
+```{r}
+#questions:
+#   How does player age impact time per match
+#   Do older or younger players tend to progress further into the tourney
+#   How does the number of aces per match change throughout the tourney
+
+#   Younger players tend to play longer matches and are more likely to make it to the finals
+#     - these could play hand in hand, younger players make it to the finals because they are able to play longer matches and not tire as quickly
+
+#   Matches in early rounds of the tournaments tend to have less aces on average
+#     - could be because players on average are less skilled in the first few rounds and their serves are easier to return; then in the finals, players are so good that their serves are difficult to return even for other skilled players
+
+
 
 wta2<- wta |> 
   mutate(avg_age = (loser_age+winner_age)/2) |> 
@@ -80,12 +126,15 @@ time_table <- wta2 |>
             avg_aces = mean(total_aces)
             ) 
 
-f <- factor(c("R128", "R64", "R32", "R16", "QF", "SF", "F"), levels = c("R128", "R64", "R32", "R16", "QF", "SF", "F"))
+df <- data.frame(
+  round <- c("SF","R64", "R32","R16", "R128", "QF", "F"  ),
+  value <- c( 2, 6, 5,4, 7, 3, 1)
+)
 
 
 #view(time_table)
 time_table|> 
-  ggplot(aes(x = reorder(round, f), y=mean_time, color = avg_age, size=avg_aces)) +
+  ggplot(aes(x = reorder(round, mean_time), y=mean_time, color = avg_age, size=avg_aces)) +
   geom_point() +
   scale_color_viridis_c() +
   labs(
@@ -154,7 +203,7 @@ wta5$winner_ioc[wta5$winner_ioc == "UKR"] <- "Ukraine"
 ```
 
 ```{r}
-
+#tournament wins per country
 
 # create world map using ggplot() function 
 world_map <- map_data("world")
@@ -232,6 +281,7 @@ wta4$loser_ioc[wta4$loser_ioc == "UKR"] <- "Ukraine"
 
 
 ```{r}
+#tournament losses per country
 world_map <- map_data("world")
 world_map <- subset(world_map, region != "Antarctica")
 
@@ -252,25 +302,7 @@ ggplot(wta4) +
 ```
 
 
-```{r}
-#world maop by number of players per country? (not done yet, barely touched)
-world_map <- map_data("world")
-world_map <- subset(world_map, region != "Antarctica")
 
-ggplot(wta4) +
-  geom_map(
-    data =  world_map, map = world_map, aes(map_id = region),
-    fill = "white", color = "#7f7f7f", size = 0.25
-  ) +
-  geom_map(map = world_map, aes(map_id = loser_ioc, fill = n), size = 0.25) +
-  scale_fill_gradient(low = "lightblue", high = "darkblue", name = "Tournament Losses") +
-  expand_limits(x = world_map$long, y = world_map$lat) +
-  labs(
-        caption = "White = no tournament data"
-
-  )
-
-```
 
 
 ```{r}

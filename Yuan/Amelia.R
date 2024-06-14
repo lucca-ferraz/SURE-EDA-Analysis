@@ -20,7 +20,7 @@ unique_surface
 # [1] "Clay"  "Grass" "Hard" 
 
 # Question 1: Is there a relationship between the height of the players and 
-# their success in winning matches at Grand Slams?
+# their success in winning matches?
 
 # Visualizing
 library(tidyverse)

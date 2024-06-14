@@ -32,7 +32,7 @@ wta3 <- wta3 |>  separate(match_2, sep="-", c("w_set2_score", 'l_set2_score'))
 wta3 <- wta3 |>  separate(match_3, sep="-", c("w_set3_score", 'l_set3_score'))
 
 
-install.packages('stringr')
+#install.packages('stringr')
 library(stringr)
 # wta3 <- wta3 |>  separate(l_set1_score, sep="(", c("l_games_set1", "extra"))
 #view(wta3)
@@ -139,13 +139,16 @@ time_table|>
   scale_color_viridis_c() +
   labs(
     title = "Average Time per Match by Round",
-    subtitle = "With Comparisons of Average Age and Average Number of Aces (per match)",
-    x = "Round of Tournament",
+    subtitle = "With Comparisons of Average Age and Number of Aces",
+    x = "Round of Tournament\n",
     y = "Average Time (minutes)",
-    caption = "Excluding withdrawn games"
+    caption = "Excluding withdrawn games, all information averaged per one match", 
+    color = "Average Age", 
+    size = "Average Aces"
   )+
   theme_minimal()
 ```
+
 ```{r}
 wta5 <- wta |>
   select(winner_ioc) |>
@@ -225,6 +228,7 @@ ggplot(wta5) +
 
 
 ```
+
 ```{r}
 wta4 <- wta2 |>
   select(loser_ioc) |>
@@ -279,7 +283,6 @@ wta4$loser_ioc[wta4$loser_ioc == "TUN"] <- "Tunisia"
 wta4$loser_ioc[wta4$loser_ioc == "UKR"] <- "Ukraine"
 ```
 
-
 ```{r}
 #tournament losses per country
 world_map <- map_data("world")
@@ -300,10 +303,6 @@ ggplot(wta4) +
 
 
 ```
-
-
-
-
 
 ```{r}
 #clustering
@@ -386,6 +385,7 @@ kmeans_search |>
   geom_point(size = 4) +
   scale_x_continuous(breaks = n_clusters_search)
 ```
+
 ```{r}
 #break point
 #does someone who wins more break points lose to less aces
@@ -419,7 +419,6 @@ bp_losers <- wta2 |>
 head(bp_losers)
 
 ```
-
 
 ```{r}
 
@@ -543,12 +542,10 @@ kmeans_search |>
   scale_x_continuous(breaks = n_clusters_search) 
   
 ```
+
 ```{r}
 # plot winner and loser clusters together
 plot_grid(graph1, graph2, nrow=2, align='h')
 
 
 ```
-
-
-

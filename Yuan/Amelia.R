@@ -139,8 +139,139 @@ ggplot(wta_prepared, aes(x = winner_age, y = w_ace, color = cluster)) +
   theme_minimal() +
   theme(legend.position = "right")
 
+# Conclusion: This one does not have a very clear trend.
+
+##################################################
+
+library(dplyr)
+library(ggplot2)
+library(cluster)
 
 
+wta_prepared_2 <- wta_grand_slam_matches %>%
+  select(winner_seed, w_ace) %>%
+  na.omit()
+
+# cleaning
+wta_prepared_2$winner_seed <- gsub("[^0-9]", "", wta_prepared_2$winner_seed) # 移除非数字字符
+wta_prepared_2$winner_seed <- as.numeric(wta_prepared_2$winner_seed) # 转换为数值型
+
+# caculate
+distance_matrix <- dist(wta_prepared_2, method = "euclidean")
+
+# clu
+hc <- hclust(distance_matrix, method = "complete")
+
+# den
+plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches by Winner Seed and Winner Aces")
+
+# hight
+clusters <- cutree(hc, k = 4) 
+
+# add to original dataset
+wta_prepared_2$cluster <- as.factor(clusters)
+
+max_aces_per_seed <- wta_prepared_2 %>%
+  group_by(winner_seed) %>%
+  summarise(max_ace = max(w_ace, na.rm = TRUE))
+# point plot
+ggplot(wta_prepared_2, aes(x = factor(winner_seed, levels = sort(unique(winner_seed))), y = w_ace, color = cluster)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Cluster Analysis of Winner's Seed vs. Number of Aces",
+       x = "Winner's Seed",
+       y = "Number of Aces",
+       color = "Cluster") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+# Trend: The graph shows that winners with lower seed (e.g., 21-30) 
+# tend to have more concentrated ace scores, while winners with higher seed 
+#  (e.g. 1-15) exhibit greater variability in their ace scores."
+
+#################################
+
+library(dplyr)
+library(ggplot2)
+library(cluster)
+
+
+wta_prepared_3 <- wta_grand_slam_matches %>%
+  select(winner_seed, winner_age) %>%
+  na.omit()
+
+wta_prepared_3$winner_seed <- gsub("[^0-9]", "", wta_prepared_3$winner_seed) # 移除非数字字符
+wta_prepared_3$winner_seed <- as.numeric(wta_prepared_3$winner_seed) # 转换为数值型
+
+# caculate
+distance_matrix <- dist(wta_prepared_3, method = "euclidean")
+
+# clu
+hc <- hclust(distance_matrix, method = "complete")
+
+# den
+plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches by Winner Seed and Winner Age")
+
+# hight
+clusters <- cutree(hc, k = 4) 
+
+# add to original dataset
+wta_prepared_3$cluster <- as.factor(clusters)
+
+max_winner_age_per_seed <- wta_prepared_3 %>%
+  group_by(winner_seed) %>%
+  summarise(winner_age = max(winner_age, na.rm = TRUE))
+# point plot
+ggplot(wta_prepared_3, aes(x = factor(winner_seed, levels = sort(unique(winner_seed))), y = winner_age, color = cluster)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Cluster Analysis of Winner's Seed vs. Winner Age",
+       x = "Winner's Seed",
+       y = "Winner Age",
+       color = "Cluster") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+
+
+library(dplyr)
+library(ggplot2)
+library(cluster)
+
+
+wta_prepared_4 <- wta_grand_slam_matches %>%
+  select(round, minutes) %>%
+  na.omit()
+
+wta_prepared_4$round <- gsub("[^0-9]", "", wta_prepared_4$round) 
+wta_prepared_4$round <- as.numeric(wta_prepared_4$round) 
+
+# caculate
+distance_matrix <- dist(wta_prepared_4, method = "euclidean")
+
+# clu
+hc <- hclust(distance_matrix, method = "complete")
+
+# den
+plot(hc, main = "Hierarchical Clustering of WTA Grand Slam Matches by Round and Minutes")
+
+# hight
+clusters <- cutree(hc, k = 4) 
+
+# add to original dataset
+wta_prepared_4$cluster <- as.factor(clusters)
+
+max_winner_age_per_seed <- wta_prepared_3 %>%
+  group_by(round) %>%
+  summarise(minutes = max(minutes, na.rm = TRUE))
+# point plot
+ggplot(wta_prepared_4, aes(x = factor(round, levels = sort(unique(round))), y = minutes, color = cluster)) +
+  geom_point(alpha = 0.6) +
+  labs(title = "Cluster Analysis of Round vs. Minutes",
+       x = "Round",
+       y = "Minutes",
+       color = "Cluster") +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  coord_flip()
 
 
 

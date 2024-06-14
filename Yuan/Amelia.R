@@ -24,16 +24,20 @@ unique_surface
 # Visualizing
 library(tidyverse)
 
+
+
 wta_grand_slam_matches %>%
   ggplot(aes(x = winner_age, y = minutes)) +
   geom_smooth(aes(color = "Winner Age"), method = "lm", se = FALSE) +
   geom_smooth(aes(x = loser_age, y = minutes, color = "Loser Age"), method = "lm", se = FALSE) +
-  labs(title = "Influence of Age on Match Duration",
+  labs(title = "Winner and Loser Age vs Match Duration",
        x = "Age (years)",
        y = "Match Duration (minutes)",
        color = "Player Type") +
   theme_minimal() +
-  coord_flip()
+  scale_color_manual(values = c("Winner Age" = "midnightblue", "Loser Age" = "orange")) +
+  coord_flip() +
+  theme(plot.title = element_text(size = 15, face = "bold")) 
 
 # Findings
 # Two lines: Loser Age vs Match Duration and Winner Age vs Match Duration

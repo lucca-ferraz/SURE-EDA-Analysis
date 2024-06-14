@@ -19,8 +19,7 @@ unique_surface <- wta_grand_slam_matches |>
 unique_surface
 # [1] "Clay"  "Grass" "Hard" 
 
-# Question 1: Is there a relationship between the height of the players and 
-# their success in winning matches at Grand Slams?
+# Question 1: Age by match duration
 
 # Visualizing
 library(tidyverse)

@@ -176,17 +176,18 @@ wta_grand_slam_players <- winners |>
 
 # plot: serves won vs opponent serves won in upsets
 wta_grand_slam_players |> 
-  filter(rank_diff < -50) |> 
-  ggplot(aes(x = firstWon, y = opponent_firstWon, color = result, alpha = 0.5)) +
+  filter(rank_diff < -100) |> 
+  ggplot(aes(x = firstWon, y = opponent_firstWon, color = result, alpha = 0.1)) +
   geom_point() +
   ggthemes::theme_clean() +
   facet_wrap(~ result) +
   ggtitle("How Do First Serves Won Impact Upsets in Tennis?",
-          subtitle = "Among matches with a rank differential above 50") +
+          subtitle = "Among matches with a rank differential above 100") +
   xlab("First Serves Won") + 
   ylab("Opponent First Serves Won") +
   guides(alpha = "none") + 
-  labs(caption = "Data from WTA matches 2018-2023")
+  labs(caption = "Data from WTA matches 2018-2023") +
+  scale_color_manual(values = c("#f94144", "#90be6d"))
 
 # plot: top 3 countries wins and losses
 wta_grand_slam_players |> 
@@ -211,7 +212,8 @@ player_stats <- wta_grand_slam_players |>
             opponent_first_serve_win_pct = sum(opponent_firstWon) / sum(opponent_firstIn),
             opponent_second_serve_win_pct = sum(opponent_secondWon) / (sum(opponent_svpt) - sum(opponent_firstIn)),
             opponent_ace_pct = sum(opponent_ace) / sum(opponent_svpt),
-            opponent_bp_break_pct = 1 - sum(opponent_bpSaved)/sum(opponent_bpFaced)
+            opponent_bp_break_pct = 1 - sum(opponent_bpSaved)/sum(opponent_bpFaced),
+            highest_rank = min(rank, na.rm = TRUE)
             )
 
 # plot: first serve percent vs win pct
@@ -279,19 +281,33 @@ kmeans <- clean_cluster_stats |>
   select(std_bp_save_pct, std_opponent_bp_break_pct) |> 
   kmeans(centers = 4, nstart = 30, algorithm = "Lloyd")
 
+# install.packages("wesanderson")
+library(wesanderson)
 # Visualizing k-means clusters
 clean_cluster_stats |> 
-  mutate(player_cluster = factor(kmeans$cluster)) |> 
+  mutate(player_cluster = factor(kmeans$cluster),
+         rank = case_when(
+           highest_rank <= 25 ~ "Top 25",
+           highest_rank <= 50 ~ "Top 50",
+           highest_rank <= 100 ~ "Top 100",
+           highest_rank <= 200 ~ "Top 200",
+           TRUE ~ "Above 200"
+         )) |> 
   ggplot(aes(x = std_bp_save_pct, y = std_opponent_bp_break_pct,
-             color = player_cluster, shape = player_cluster)) +
+             color = player_cluster)) +
   geom_point() +
   ggthemes::scale_color_colorblind() +
   ggthemes::theme_clean() +
   coord_fixed() +
   xlab("Standardized Break Point Saved %") +
   ylab("Standardized Opponent Break Points Broken %") +
-  labs(title = "K-Means Clustering - Break Point Performance")
+  labs(title = "K-Means Clustering - Break Point Performance",
+       caption = "Data from WTA Matches 2018 - 2023") + 
+  scale_color_manual(values = c("#ffbe0b", "#fb5607", "#3a86ff", "#8338ec"),
+                     name = "Player Cluster") 
 
+# install.packages("ggsci")
+library(ggsci)
 # density plot comparing win percentages for each cluster
 clean_cluster_stats |> 
   mutate(player_cluster = factor(kmeans$cluster)) |> 
@@ -308,6 +324,33 @@ clean_cluster_stats |>
        subtitle = "Clusters 1 and 3 tend to dominate",
        caption = "Data from WTA Matches 2018 - 2023") +
   ggthemes::theme_clean() + 
-  scale_fill_discrete(name = "Player Cluster")
+  scale_fill_tron(name = "Player Cluster") +
+  theme(
+    strip.text.x = element_text(face = "bold.italic")
+  ) +
+  xlab("Win Percentage")
 
+# hierarchical clustering
+bp_dist <- clean_cluster_stats |> 
+  select(std_bp_save_pct, std_opponent_bp_break_pct) |>
+  dist()
+bp_hclust <- bp_dist |> 
+  hclust(method = "complete")
+clean_cluster_stats |> 
+  mutate(cluster = factor(cutree(bp_hclust, k = 4))) |> 
+  ggplot(aes(x = std_bp_save_pct, y = std_opponent_bp_break_pct,
+             color = cluster)) +
+  geom_point() +
+  ggthemes::scale_color_colorblind() +
+  ggthemes::theme_clean() +
+  coord_fixed() +
+  xlab("Standardized Break Point Saved %") +
+  ylab("Standardized Opponent Break Points Broken %") +
+  labs(title = "K-Means Clustering - Break Point Performance") + 
+  scale_color_manual(values = c("#ffbe0b", "#fb5607", "#3a86ff", "#8338ec"),
+                     name = "Player Cluster") 
 
+clean_cluster_stats |> 
+  mutate(player_cluster = factor(kmeans$cluster)) |> 
+  filter(name == "Leylah Fernandez") |> 
+  select(player_cluster)
